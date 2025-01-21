@@ -1,4 +1,4 @@
-package kotlinproject.shoppingmall
+package SHOPPING_MALL_SYSTEM.shoppingmall
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
