@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품등록</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 기본 스타일 설정 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 600px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        div {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        /* 입력 필드 스타일 */
+        input[type="text"], input[type="file"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box; /* 패딩 포함 */
+        }
+        /* 버튼 스타일 */
+        button {
+            background-color: springgreen;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="add-product-form" enctype="multipart/form-data">
+            <h1>상품등록</h1>
+            <input type="hidden" name="user_id" value="{{ user_id }}"/>
+
+            <div>
+                <label for="name">상품명</label>
+                <input type="text" id="name" name="name" placeholder="상품명" required>
+            </div>
+
+            <div>
+                <label for="description">상품 설명</label>
+                <input type="text" id="description" name="description" placeholder="상품 설명" required>
+            </div>
+
+            <div>
+                <label for="price">가격</label>
+                <input type="text" id="price" name="price" placeholder="가격" required>
+            </div>
+
+            <div>
+                <label for="stock">수량</label>
+                <input type="text" id="stock" name="stock" placeholder="수량" required>
+            </div>
+
+            <div>
+                <label for="productImage">상품 이미지 업로드</label>
+                <input type="file" id="productImage" name="productImage" accept="image/*" required>
+            </div>
+
+            <button type="submit">등록</button>
+        </form>
+    </div> <!-- /container -->
+
+    <script>
+        $(document).ready(function() {
+            $('#add-product-form').on('submit', function(event) {
+                event.preventDefault();  // 기본 제출 동작 방지
+
+                const formData = new FormData(this);  // FormData 객체 생성
+
+                $.ajax({
+                    url: '/addProduct',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // 파일 데이터 전송을 위해 false 설정
+                    contentType: false,   // 기본 콘텐츠 타입을 설정하지 않음
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error);  // error 메시지를 alert로 표시
+                        } else {
+                            alert(response.message);  // 성공 메시지를 alert로 표시
+                            location.reload();  // 페이지 새로고침
+                        }
+                    },
+                    error: function(xhr) {
+                        // 오류 메시지 팝업
+                        const errorResponse = xhr.responseJSON;
+                        alert(errorResponse.error || "상품 등록 중 오류가 발생했습니다.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

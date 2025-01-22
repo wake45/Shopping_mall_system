@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 60px; /* 패딩을 늘려서 높이 증가 */
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px; /* 박스 너비를 키움 */
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        p {
+            margin: 15px 0;
+        }
+        input[type="radio"] {
+            margin: 0 5px;
+        }
+        label {
+            margin-right: 15px;
+            color: #555;
+        }
+        button {
+            background-color: springgreen;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form action="/main" method="get">
+            <h1>로그인</h1>
+            <p>
+                <label>
+                    <input type="radio" name="user_id" value="1" checked> 영희
+                </label>
+                <label>
+                    <input type="radio" name="user_id" value="2"> 철수
+                </label>
+                <label>
+                    <input type="radio" name="user_id" value="3"> 민수
+                </label>
+                <label>
+                    <input type="radio" name="user_id" value="4"> 기훈
+                </label>
+            </p>
+            <p>
+                <button type="submit">로그인</button>
+            </p>
+        </form>
+    </div> <!-- /container -->
+</body>
+</html>

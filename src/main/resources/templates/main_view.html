@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인메뉴</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        h2 {
+            color: springgreen;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        p {
+            margin: 15px 0;
+        }
+        button {
+            background-color: springgreen;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form method="get">
+            <input type="hidden" name="user_id" value="{{ user_id }}"/>
+            <h1>메뉴 선택</h1>
+            <h2><span>{{ name }}</span> 고객님 반갑습니다!</h2>
+            <p>
+                <button type="button" onclick="submitForm('addProduct')">상품등록</button>
+                <button type="button" onclick="submitForm('manageProducts')">상품관리</button>
+            </p>
+            <p>
+                <button type="button" onclick="submitForm('newOrder')">주문하기</button>
+                <button type="button" onclick="submitForm('manageOrders')">주문관리</button>
+            </p>
+        </form>
+    </div> <!-- /container -->
+    
+    <script>
+        function submitForm(action) {
+            const form = document.querySelector('form');
+
+            // 기존 입력 필드 삭제
+            const existingInput = form.querySelector('input[name="action"]');
+            if (existingInput) {
+                existingInput.value = action;
+            } else {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'action';
+                input.value = action;
+                form.appendChild(input);
+            }
+            
+            form.action = "/" + action;
+            form.submit();
+        }
+    </script>
+</body>
+</html>

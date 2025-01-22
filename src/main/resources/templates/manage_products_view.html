@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품목록</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .product {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .product img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .product-name {
+            flex-grow: 1;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        .action-buttons, .deleted {
+            display: flex;
+            align-items: center;
+            height: 50px;
+            margin-left: 10px;
+        }
+        .deleted {
+            color: red;
+            justify-content: center;
+        }
+        button {
+            background-color: springgreen;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+        }
+
+        /* 팝업 스타일 */
+        .popup {
+            display: none; /* 기본적으로 숨김 */
+            position: fixed;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px; /* 원래 크기로 설정 */
+            height: 490px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative; /* 버튼 위치 조정을 위해 relative 설정 */
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .close-btn {
+            cursor: pointer;
+            color: red;
+        }
+        .form-group {
+            margin-bottom: 10px;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 6px; /* 입력 박스 크기 줄이기 */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 5px; /* input 필드 위쪽에 마진 추가 */
+        }
+        .save-button {
+            position: absolute; /* 버튼 위치를 절대 위치로 설정 */
+            bottom: 10px; /* 아래에서 10px */
+            right: 20px; /* 오른쪽에서 20px */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>상품목록</h1>
+
+        <div id="product-list">
+            <div class="product">
+                <img src="product-image-url.jpg" alt="상품 이미지">
+                <span class="product-name">상품명 1</span>
+                <div class="action-buttons">
+                    <button onclick="openPopup(1)">수정</button>
+                    <button onclick="deleteProduct(1)">삭제</button>
+                </div>
+            </div>
+            <div class="product">
+                <img src="product-image-url.jpg" alt="상품 이미지">
+                <span class="product-name">상품명 2</span>
+                <div class="action-buttons">
+                    <button onclick="openPopup(2)">수정</button>
+                    <button onclick="deleteProduct(2)">삭제</button>
+                </div>
+            </div>
+            <div class="product">
+                <img src="product-image-url.jpg" alt="상품 이미지">
+                <span class="product-name">상품명 3</span>
+                <div class="deleted">삭제됨</div>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <button onclick="goToPage(1)">1</button>
+            <button onclick="goToPage(2)">2</button>
+            <button onclick="goToPage(3)">3</button>
+        </div>
+    </div> <!-- /container -->
+
+    <!-- 팝업 -->
+    <div class="popup" id="editPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2>상품 수정</h2>
+                <span class="close-btn" onclick="closePopup()">✖</span>
+            </div>
+            <div class="form-group">
+                <label for="productName">상품명:</label>
+                <input type="text" id="productName" placeholder="상품명을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="productDescription">상품설명:</label>
+                <input type="text" id="productDescription" placeholder="상품설명을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="productPrice">가격:</label>
+                <input type="number" id="productPrice" placeholder="가격을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="productQuantity">수량:</label>
+                <input type="number" id="productQuantity" placeholder="수량을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="productImage">상품사진:</label>
+                <input type="file" id="productImage">
+            </div>
+            <div class="form-group">
+                <button class="save-button" onclick="saveChanges()">수정</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openPopup(productId) {
+            document.getElementById('editPopup').style.display = 'flex';
+            // 상품 ID에 따라 상품 정보를 로드할 수 있습니다.
+        }
+
+        function closePopup() {
+            document.getElementById('editPopup').style.display = 'none';
+        }
+
+        function saveChanges() {
+            alert('수정된 내용이 저장되었습니다!');
+            closePopup();
+        }
+
+        function deleteProduct(productId) {
+            alert("상품 삭제: " + productId);
+        }
+
+        function goToPage(pageNumber) {
+            alert("페이지 이동: " + pageNumber);
+        }
+    </script>
+</body>
+</html>
