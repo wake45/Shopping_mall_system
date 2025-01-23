@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,9 +55,9 @@
 <body>
     <div class="container">
         <form method="get">
-            <input type="hidden" name="user_id" value="{{ user_id }}"/>
+            <input type="hidden" name="user_id" th:value="${user_id}"/>
             <h1>메뉴 선택</h1>
-            <h2><span>{{ name }}</span> 고객님 반갑습니다!</h2>
+            <h2><span th:text="${username}"></span> 고객님 반갑습니다!</h2>
             <p>
                 <button type="button" onclick="submitForm('addProduct')">상품등록</button>
                 <button type="button" onclick="submitForm('manageProducts')">상품관리</button>

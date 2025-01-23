@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,7 +71,7 @@
     <div class="container">
         <form id="add-product-form" enctype="multipart/form-data">
             <h1>상품등록</h1>
-            <input type="hidden" name="user_id" value="{{ user_id }}"/>
+            <input type="hidden" name="user_id" th:value="${user_id}"/>
 
             <div>
                 <label for="name">상품명</label>

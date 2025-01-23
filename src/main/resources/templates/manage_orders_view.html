@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -129,6 +129,7 @@
     <div class="container">
         <h1>주문 목록</h1>
 
+        <input type="hidden" name="user_id" th:value="${user_id}"/>
         <div id="product-list">
             <div class="product">
                 <span class="product-name">2025.1.10 주문</span>
