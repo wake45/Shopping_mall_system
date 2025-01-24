@@ -21,12 +21,8 @@ class LoginController(private val userService: UserService) {
     //메인화면
     @PostMapping("/main")
     fun login(@RequestParam user_id:String): ModelAndView {
-
         val usernameOptional = userService.getUser(user_id)
 
-        val modelAndView = ModelAndView("main_view")
-        modelAndView.addObject("user_id",user_id)
-        
         return if (usernameOptional.isPresent) {
             val modelAndView = ModelAndView("main_view")
             modelAndView.addObject("user_id", user_id)

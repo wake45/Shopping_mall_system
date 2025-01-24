@@ -97,6 +97,15 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: relative; /* 버튼 위치 조정을 위해 relative 설정 */
         }
+        .popup-content-delete {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 250px; /* 원래 크기로 설정 */
+            height: 100px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative; /* 버튼 위치 조정을 위해 relative 설정 */
+        }
         .popup-header {
             display: flex;
             justify-content: space-between;
@@ -143,22 +152,30 @@
                 <div class="product">
                     <img th:src="@{${product.image_url}}" alt="상품 이미지">
                     <span class="product-name" th:text="${product.name}"></span>
-                    <div class="action-buttons">
-                        <button th:if="${product.status == 'available'}"
+                    <div class="action-buttons" th:if="${product.status == 'available'}">
+                        <button 
                                 th:data-product-id="${product.product_id}"
                                 th:data-user-id="${product.user_id}"
-                                th:data-product-name="${product.name}"
-                                th:data-product-description="${product.description}"
-                                th:data-product-price="${product.price}"
-                                th:data-product-stock="${product.stock}"
-                                th:data-product-created-at="${product.created_at}"
-                                th:data-product-modified-at="${product.modified_at}"
+                                th:data-name="${product.name}"
+                                th:data-description="${product.description}"
+                                th:data-price="${product.price}"
+                                th:data-stock="${product.stock}"
+                                th:data-created-at="${product.created_at}"
+                                th:data-modified-at="${product.modified_at}"
+                                th:data-image-url="${product.image_url}"
                                 onclick="openPopup(this)">
                             수정
                         </button>
-                        <button onclick="confirmDelete(${product.product_id})">삭제</button>
+                        <button 
+                                th:data-product-id="${product.product_id}"
+                                th:data-user-id="${product.user_id}"
+                                onclick="confirmDelete(this)">
+                            삭제
+                        </button>
                     </div>
                     <div class="deleted" th:if="${product.status == 'deleted' || product.deleted_at != null}">
+                        <span th:text="${#dates.format(product.deleted_at, 'yyyy-MM-dd')}"></span>
+                        &nbsp;&nbsp;
                         삭제됨
                     </div>
                 </div>
@@ -177,8 +194,9 @@
                 <h2>상품 수정</h2>
                 <span class="close-btn" onclick="closePopup()">✖</span>
             </div>
-            <input type="hidden" id="productId" placeholder="상품명을 입력하세요">
-            <input type="hidden" id="productUserId" placeholder="상품명을 입력하세요">
+            <input type="hidden" id="productId">
+            <input type="hidden" id="productUserId">
+            <input type="text" id="productImageUrl">
             <div class="form-group">
                 <label for="productName">상품명:</label>
                 <input type="text" id="productName" placeholder="상품명을 입력하세요">
@@ -192,8 +210,7 @@
                 <input type="number" id="productPrice" placeholder="가격을 입력하세요">
             </div>
             <div class="form-group">
-                <label for="productQuantity">수량:</label>
-                <input type="number" id="productQuantity" placeholder="수량을 입력하세요">
+                <input type="number" id="productStock" placeholder="수량을 입력하세요">
             </div>
             <div class="form-group">
                 <label for="productImage">상품사진:</label>
@@ -216,7 +233,7 @@
 
     <!-- 삭제 확인 팝업 -->
     <div class="popup" id="deleteConfirmPopup" style="display:none;">
-        <div class="popup-content">
+        <div class="popup-content-delete">
             <h2>정말 삭제하시겠습니까?</h2>
             <button id="confirmDeleteButton">예</button>
             <button onclick="closeDeleteConfirmPopup()">아니요</button>
@@ -228,23 +245,22 @@
             // 버튼의 데이터 속성에서 값 가져오기
             const product_id = button.getAttribute('data-product-id');
             const user_id = button.getAttribute('data-user-id');
-            const name = button.getAttribute('data-product-name');
-            const description = button.getAttribute('data-product-description');
-            const price = button.getAttribute('data-product-price');
-            const stock = button.getAttribute('data-product-stock');
-            const created_at = button.getAttribute('data-product-created-at');
-            const modified_at = button.getAttribute('data-product-modified-at');
-
-            // 콘솔에 값 출력
-            console.log(product_id, user_id, name, description, price, stock, created_at, modified_at);
+            const name = button.getAttribute('data-name');
+            const description = button.getAttribute('data-description');
+            const price = button.getAttribute('data-price');
+            const stock = button.getAttribute('data-stock');
+            const created_at = button.getAttribute('data-created-at');
+            const modified_at = button.getAttribute('data-modified-at');
+            const image_url = button.getAttribute('data-image-url');
 
             // 입력 필드 값 설정
             document.getElementById('productId').value = product_id;
             document.getElementById('productUserId').value = user_id;
+            document.getElementById('productImageUrl').value = image_url;
             document.getElementById('productName').value = name;
             document.getElementById('productDescription').value = description;
             document.getElementById('productPrice').value = price;
-            document.getElementById('productQuantity').value = stock;
+            document.getElementById('productStock').value = stock;
 
             // 텍스트로 보여주기
             document.getElementById('productCreatedAt').textContent = created_at; // 등록일자 표시
@@ -262,24 +278,52 @@
 
         // 수정된 정보 저장 함수 (예시)
         function saveChanges() {
+            var product_id = document.getElementById('productId').value;
+            var user_id = document.getElementById('productUserId').value;
+            var image_url = document.getElementById('productImageUrl').value;
             var name = document.getElementById('productName').value;
             var description = document.getElementById('productDescription').value;
             var price = document.getElementById('productPrice').value;
-            var quantity = document.getElementById('productQuantity').value;
+            var stock = document.getElementById('productStock').value;
             var image = document.getElementById('productImage').files[0]; // 선택된 파일
 
-            // 데이터를 서버로 보내는 코드 추가 (예: Ajax 요청)
-            console.log("수정된 정보:", name, description, price, quantity, image);
+            // FormData 객체 생성
+            var formData = new FormData();
+            formData.append('product_id', product_id);
+            formData.append('user_id', user_id);
+            formData.append('image_url', image_url);
+            formData.append('name', name);
+            formData.append('description', description);
+            formData.append('price', price);
+            formData.append('stock', stock);
+            formData.append('image', image); // 파일 추가
+
+            $.ajax({
+                url: '/updateProduct',
+                type: 'PUT',
+                data: formData,
+                processData: false,  // 파일 데이터 전송을 위해 false 설정
+                contentType: false,   // 기본 콘텐츠 타입을 설정하지 않음
+                success: function(response) {
+                    alert(response); // 응답 메시지 표시
+                    location.reload(); // 성공 시 페이지 새로 고침
+                },
+                error: function(xhr) {
+                    // 오류 메시지 팝업
+                    alert("상품 수정 중 오류가 발생했습니다.");
+                }
+            });
 
             // 수정 후 팝업 닫기
             closePopup();
         }
 
-        function confirmDelete(productId) {
-            currentProductId = productId; // 현재 삭제할 상품 ID 저장
+        function confirmDelete(button) {
+            const product_id = button.getAttribute('data-product-id');
+            const user_id = button.getAttribute('data-user-id');
             document.getElementById('deleteConfirmPopup').style.display = 'flex';
             document.getElementById('confirmDeleteButton').onclick = function() {
-                deleteProduct(currentProductId);
+                deleteProduct(product_id, user_id);
             };
         }
 
@@ -287,8 +331,28 @@
             document.getElementById('deleteConfirmPopup').style.display = 'none';
         }
 
-        function deleteProduct(productId) {
-            alert("상품 삭제: " + productId);
+        function deleteProduct(productId, userId) {
+            // FormData 객체 생성
+            var formData = new FormData();
+            formData.append('product_id', productId);
+            formData.append('user_id', userId);
+
+            $.ajax({
+                url: '/deleteProduct',
+                type: 'DELETE',
+                data: formData,
+                processData: false,  // 파일 데이터 전송을 위해 false 설정
+                contentType: false,   // 기본 콘텐츠 타입을 설정하지 않음
+                success: function(response) {
+                    alert(response); // 응답 메시지 표시
+                    location.reload(); // 성공 시 페이지 새로 고침
+                },
+                error: function(xhr) {
+                    // 오류 메시지 팝업
+                    alert("상품 삭제 중 오류가 발생했습니다.");
+                }
+            });
+
             closeDeleteConfirmPopup();
         }
 

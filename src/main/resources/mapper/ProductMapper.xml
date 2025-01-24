@@ -15,4 +15,15 @@
         WHERE user_id = #{user_id}
     </select>
 
+    <update id="updateProduct" parameterType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
+        UPDATE Products
+        SET name = #{name}, description = #{description}, price = #{price}, stock = #{stock}, image_url = #{image_url}
+        WHERE user_id = #{user_id} AND product_id = #{product_id}
+    </update>
+
+    <update id="deleteProduct" parameterType="map">
+        UPDATE Products
+        SET deleted_at = NOW(), status = 'deleted'
+        WHERE user_id = #{user_id} AND product_id = #{product_id}
+    </update>
 </mapper>

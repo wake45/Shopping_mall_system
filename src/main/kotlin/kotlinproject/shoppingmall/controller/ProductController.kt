@@ -52,4 +52,27 @@ class ProductController(private val productService: ProductService){
             }
         }
     }
+
+    @PutMapping("/updateProduct")
+    fun updateProduct(@ModelAttribute product: Product, @RequestParam("image") file: MultipartFile): ResponseEntity<String>{
+        productService.deleteImage(product.image_url)
+        product.image_url = productService.saveImage(file)
+
+        val isSuccess = productService.updateProduct(product)
+        return if (isSuccess){
+            ResponseEntity.ok("상품이 수정되었습니다.") // 성공 메시지 반환
+        } else {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 수정 실패")
+        }
+    }
+
+    @DeleteMapping("/deleteProduct")
+    fun deleteProduct(@RequestParam product_id: Int, @RequestParam user_id: Int): ResponseEntity<String>{
+        val isSuccess = productService.deleteProduct(product_id, user_id)
+        return if (isSuccess){
+            ResponseEntity.ok("상품이 삭제되었습니다.") // 성공 메시지 반환
+        } else {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 삭제 실패")
+        }
+    }
 }

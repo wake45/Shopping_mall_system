@@ -13,7 +13,7 @@ CREATE TABLE Products (
     price DECIMAL(10, 2) NOT NULL, -- 가격
     stock INT NOT NULL, -- 재고 수량
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 생성 날짜
-    modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 수정 날짜
+    modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,               
     deleted_at DATETIME, -- 삭제 날짜 (soft delete 용)
     status ENUM('available', 'deleted') DEFAULT 'available', -- 상태
     image_url VARCHAR(255), -- 이미지 URL
