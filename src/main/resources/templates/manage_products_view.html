@@ -93,7 +93,7 @@
             padding: 20px;
             border-radius: 8px;
             width: 400px; /* 원래 크기로 설정 */
-            height: 490px;
+            height: 580px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: relative; /* 버튼 위치 조정을 위해 relative 설정 */
         }
@@ -133,45 +133,52 @@
     <div class="container">
         <h1>상품목록</h1>
 
-        <input type="hidden" name="user_id" th:value="${user_id}"/>
         <div id="product-list">
-            <div class="product">
-                <img src="product-image-url.jpg" alt="상품 이미지">
-                <span class="product-name">상품명 1</span>
-                <div class="action-buttons">
-                    <button onclick="openPopup(1)">수정</button>
-                    <button onclick="deleteProduct(1)">삭제</button>
-                </div>
+            <div th:if="${products.isEmpty()}">
+                <p>등록하신 상품이 없습니다.</p>
             </div>
-            <div class="product">
-                <img src="product-image-url.jpg" alt="상품 이미지">
-                <span class="product-name">상품명 2</span>
-                <div class="action-buttons">
-                    <button onclick="openPopup(2)">수정</button>
-                    <button onclick="deleteProduct(2)">삭제</button>
+            <div th:if="${not products.isEmpty()}" th:each="product : ${products}">
+                <input type="hidden" th:value="${product.product_id}" />
+                <input type="hidden" th:value="${product.user_id}" />
+                <div class="product">
+                    <img th:src="@{${product.image_url}}" alt="상품 이미지">
+                    <span class="product-name" th:text="${product.name}"></span>
+                    <div class="action-buttons">
+                        <button th:if="${product.status == 'available'}"
+                                th:data-product-id="${product.product_id}"
+                                th:data-user-id="${product.user_id}"
+                                th:data-product-name="${product.name}"
+                                th:data-product-description="${product.description}"
+                                th:data-product-price="${product.price}"
+                                th:data-product-stock="${product.stock}"
+                                th:data-product-created-at="${product.created_at}"
+                                th:data-product-modified-at="${product.modified_at}"
+                                onclick="openPopup(this)">
+                            수정
+                        </button>
+                        <button onclick="confirmDelete(${product.product_id})">삭제</button>
+                    </div>
+                    <div class="deleted" th:if="${product.status == 'deleted' || product.deleted_at != null}">
+                        삭제됨
+                    </div>
                 </div>
-            </div>
-            <div class="product">
-                <img src="product-image-url.jpg" alt="상품 이미지">
-                <span class="product-name">상품명 3</span>
-                <div class="deleted">삭제됨</div>
             </div>
         </div>
-
+<!--
         <div class="pagination">
-            <button onclick="goToPage(1)">1</button>
-            <button onclick="goToPage(2)">2</button>
-            <button onclick="goToPage(3)">3</button>
-        </div>
+            <button th:each="page : ${pageNumbers}" onclick="goToPage(${page})" th:text="${page}"></button>
+        </div> -->
     </div> <!-- /container -->
 
-    <!-- 팝업 -->
-    <div class="popup" id="editPopup">
+    <!-- 수정 팝업 -->
+    <div class="popup" id="editPopup" style="display:none;">
         <div class="popup-content">
             <div class="popup-header">
                 <h2>상품 수정</h2>
                 <span class="close-btn" onclick="closePopup()">✖</span>
             </div>
+            <input type="hidden" id="productId" placeholder="상품명을 입력하세요">
+            <input type="hidden" id="productUserId" placeholder="상품명을 입력하세요">
             <div class="form-group">
                 <label for="productName">상품명:</label>
                 <input type="text" id="productName" placeholder="상품명을 입력하세요">
@@ -193,28 +200,96 @@
                 <input type="file" id="productImage">
             </div>
             <div class="form-group">
+                <label for="productcreatedAt">등록일자</label>
+                <span id="productCreatedAt">2023-01-01</span> <!-- 실제 등록일자를 여기에 표시 -->
+            </div>
+            <div class="form-group">
+                <label for="productModifiedAt">수정일자</label>
+                <span id="productModifiedAt">2023-01-02</span> <!-- 실제 수정일자를 여기에 표시 -->
+            </div>
+            <div class="form-group">
                 <button class="save-button" onclick="saveChanges()">수정</button>
             </div>
         </div>
     </div>
+    
+
+    <!-- 삭제 확인 팝업 -->
+    <div class="popup" id="deleteConfirmPopup" style="display:none;">
+        <div class="popup-content">
+            <h2>정말 삭제하시겠습니까?</h2>
+            <button id="confirmDeleteButton">예</button>
+            <button onclick="closeDeleteConfirmPopup()">아니요</button>
+        </div>
+    </div>
 
     <script>
-        function openPopup(productId) {
+        function openPopup(button) {
+            // 버튼의 데이터 속성에서 값 가져오기
+            const product_id = button.getAttribute('data-product-id');
+            const user_id = button.getAttribute('data-user-id');
+            const name = button.getAttribute('data-product-name');
+            const description = button.getAttribute('data-product-description');
+            const price = button.getAttribute('data-product-price');
+            const stock = button.getAttribute('data-product-stock');
+            const created_at = button.getAttribute('data-product-created-at');
+            const modified_at = button.getAttribute('data-product-modified-at');
+
+            // 콘솔에 값 출력
+            console.log(product_id, user_id, name, description, price, stock, created_at, modified_at);
+
+            // 입력 필드 값 설정
+            document.getElementById('productId').value = product_id;
+            document.getElementById('productUserId').value = user_id;
+            document.getElementById('productName').value = name;
+            document.getElementById('productDescription').value = description;
+            document.getElementById('productPrice').value = price;
+            document.getElementById('productQuantity').value = stock;
+
+            // 텍스트로 보여주기
+            document.getElementById('productCreatedAt').textContent = created_at; // 등록일자 표시
+            document.getElementById('productModifiedAt').textContent = modified_at; // 수정일자 표시
+
+            // 팝업 표시
             document.getElementById('editPopup').style.display = 'flex';
-            // 상품 ID에 따라 상품 정보를 로드할 수 있습니다.
         }
 
+
+        // 팝업 닫기 함수
         function closePopup() {
             document.getElementById('editPopup').style.display = 'none';
         }
 
+        // 수정된 정보 저장 함수 (예시)
         function saveChanges() {
-            alert('수정된 내용이 저장되었습니다!');
+            var name = document.getElementById('productName').value;
+            var description = document.getElementById('productDescription').value;
+            var price = document.getElementById('productPrice').value;
+            var quantity = document.getElementById('productQuantity').value;
+            var image = document.getElementById('productImage').files[0]; // 선택된 파일
+
+            // 데이터를 서버로 보내는 코드 추가 (예: Ajax 요청)
+            console.log("수정된 정보:", name, description, price, quantity, image);
+
+            // 수정 후 팝업 닫기
             closePopup();
+        }
+
+        function confirmDelete(productId) {
+            currentProductId = productId; // 현재 삭제할 상품 ID 저장
+            document.getElementById('deleteConfirmPopup').style.display = 'flex';
+            document.getElementById('confirmDeleteButton').onclick = function() {
+                deleteProduct(currentProductId);
+            };
+        }
+
+        function closeDeleteConfirmPopup() {
+            document.getElementById('deleteConfirmPopup').style.display = 'none';
         }
 
         function deleteProduct(productId) {
             alert("상품 삭제: " + productId);
+            closeDeleteConfirmPopup();
         }
 
         function goToPage(pageNumber) {

@@ -94,8 +94,8 @@
             </div>
 
             <div>
-                <label for="productImage">상품 이미지 업로드</label>
-                <input type="file" id="productImage" name="productImage" accept="image/*" required>
+                <label for="image">상품 이미지 업로드</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
             </div>
 
             <button type="submit">등록</button>
@@ -116,17 +116,12 @@
                     processData: false,  // 파일 데이터 전송을 위해 false 설정
                     contentType: false,   // 기본 콘텐츠 타입을 설정하지 않음
                     success: function(response) {
-                        if (response.error) {
-                            alert(response.error);  // error 메시지를 alert로 표시
-                        } else {
-                            alert(response.message);  // 성공 메시지를 alert로 표시
-                            location.reload();  // 페이지 새로고침
-                        }
+                        alert(response); // 응답 메시지 표시
+                        location.reload(); // 성공 시 페이지 새로 고침
                     },
                     error: function(xhr) {
                         // 오류 메시지 팝업
-                        const errorResponse = xhr.responseJSON;
-                        alert(errorResponse.error || "상품 등록 중 오류가 발생했습니다.");
+                        alert("상품 등록 중 오류가 발생했습니다.");
                     }
                 });
             });
