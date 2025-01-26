@@ -63,10 +63,13 @@ class ProductService(private val productMapper: ProductMapper){
         }
     }
 
-    fun getProductsByUserId(user_id: String): ProductResult {
+    fun getProductsByUserId(user_id: String, page: Int, size: Int): ProductResult {
         return try{
-            val products: List<Product> = productMapper.getProductsByUserId(user_id)
-            ProductResult(success = true, products = products)
+            val offset = page * size
+            val products: List<Product> = productMapper.getProductsByUserId(user_id, size, offset)
+            val totalProducts = productMapper.countProductsByUserId(user_id)
+
+            ProductResult(success = true, products = products, total = totalProducts)
         }catch(e: Exception){
             println("오류 발생: ${e.message}")
             ProductResult(success = false, errorMessage = e.message)

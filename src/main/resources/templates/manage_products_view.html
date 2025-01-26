@@ -146,6 +146,7 @@
             <div th:if="${products.isEmpty()}">
                 <p>등록하신 상품이 없습니다.</p>
             </div>
+            <input type="hidden" id="user_id" th:value="${user_id}" />
             <div th:if="${not products.isEmpty()}" th:each="product : ${products}">
                 <input type="hidden" th:value="${product.product_id}" />
                 <input type="hidden" th:value="${product.user_id}" />
@@ -181,10 +182,15 @@
                 </div>
             </div>
         </div>
-<!--
+
         <div class="pagination">
-            <button th:each="page : ${pageNumbers}" onclick="goToPage(${page})" th:text="${page}"></button>
-        </div> -->
+            <button th:each="page : ${pageNumbers}" 
+                    th:data-page="${page}"
+                    onclick="goToPage(this)" 
+                    th:text="${page}"
+                    th:class="${page == currentPage? 'active' : ''}">
+            </button>
+        </div>
     </div> <!-- /container -->
 
     <!-- 수정 팝업 -->
@@ -196,7 +202,7 @@
             </div>
             <input type="hidden" id="productId">
             <input type="hidden" id="productUserId">
-            <input type="text" id="productImageUrl">
+            <input type="hidden" id="productImageUrl">
             <div class="form-group">
                 <label for="productName">상품명:</label>
                 <input type="text" id="productName" placeholder="상품명을 입력하세요">
@@ -356,8 +362,10 @@
             closeDeleteConfirmPopup();
         }
 
-        function goToPage(pageNumber) {
-            alert("페이지 이동: " + pageNumber);
+        function goToPage(button) {
+            const pageNumber = button.getAttribute('data-page');
+            const userId = document.getElementById('user_id').value;
+            window.location.href = `/manageProductsView?user_id=${userId}&page=${pageNumber-1}&size=5`;
         }
     </script>
 </body>

@@ -9,9 +9,16 @@
         VALUES (#{user_id}, #{name}, #{description}, #{price}, #{stock}, #{image_url}) 
     </insert>
 
-    <select id="getProductsByUserId" resultType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product" parameterType="String">
+    <select id="getProductsByUserId" resultType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
         SELECT product_id, user_id, name, description, price, stock, created_at, modified_at, deleted_at, status, image_url
         FROM Products
+        WHERE user_id = #{user_id}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countProductsByUserId" resultType="int">
+        SELECT COUNT(*) 
+        FROM Products 
         WHERE user_id = #{user_id}
     </select>
 

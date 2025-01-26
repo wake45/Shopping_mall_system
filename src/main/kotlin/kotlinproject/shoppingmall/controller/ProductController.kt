@@ -37,13 +37,36 @@ class ProductController(private val productService: ProductService){
 
     //상품관리 화면이동
     @GetMapping("/manageProductsView")
-    fun showManageProductsView(@RequestParam user_id: String, model: Model): ModelAndView {
-        val result: ProductResult = productService.getProductsByUserId(user_id)
+    fun showManageProductsView(
+        @RequestParam user_id: String,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "5") size: Int,
+        model: Model
+    ) : ModelAndView {
+        val offset = (page - 1) * size
+        val result: ProductResult = productService.getProductsByUserId(user_id, page, size)
+
+        // 페이지네이션 정보 추가
+        val totalPages = if (result.total != null && size > 0) {
+            (result.total + size - 1) / size // 총 페이지 수 계산
+        } else {
+            0
+        }
+        val pageNumbers = mutableListOf<Int>()
+        val startPage = if (page <= 3) 1 else if (page + 2 >= totalPages) totalPages - 4 else page - 2
+         val endPage = if (startPage + 4 > totalPages) totalPages else startPage + 4
+
+        for (i in startPage..endPage) {
+            pageNumbers.add(i)
+        }
 
         return when{
             result.success -> {
+                model.addAttribute("user_id", user_id)
                 model.addAttribute("products", result.products)
-                println(result.products)
+                model.addAttribute("total", result.total)
+                model.addAttribute("pageNumbers", pageNumbers)
+                model.addAttribute("currentPage", page)                
                 ModelAndView("manage_products_view")
             }
             else -> {
