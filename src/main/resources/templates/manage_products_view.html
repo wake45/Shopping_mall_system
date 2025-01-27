@@ -165,7 +165,7 @@
                                 th:data-modified-at="${product.modified_at}"
                                 th:data-image-url="${product.image_url}"
                                 onclick="openPopup(this)">
-                            수정
+                            상세조회
                         </button>
                         <button 
                                 th:data-product-id="${product.product_id}"
@@ -213,10 +213,11 @@
             </div>
             <div class="form-group">
                 <label for="productPrice">가격:</label>
-                <input type="number" id="productPrice" placeholder="가격을 입력하세요">
+                <input type="text" id="productPrice" placeholder="가격을 입력하세요">
             </div>
             <div class="form-group">
-                <input type="number" id="productStock" placeholder="수량을 입력하세요">
+                <label for="productStock">수량:</label>
+                <input type="text" id="productStock" placeholder="수량을 입력하세요">
             </div>
             <div class="form-group">
                 <label for="productImage">상품사진:</label>

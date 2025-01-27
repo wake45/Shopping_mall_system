@@ -20,7 +20,7 @@ class LoginController(private val userService: UserService) {
 
     //메인화면
     @PostMapping("/main")
-    fun login(@RequestParam user_id:String): ModelAndView {
+    fun login(@RequestParam user_id: Int): ModelAndView {
         val usernameOptional = userService.getUser(user_id)
 
         return if (usernameOptional.isPresent) {

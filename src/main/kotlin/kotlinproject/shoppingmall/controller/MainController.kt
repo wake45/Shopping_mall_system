@@ -8,12 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam
 @RestController
 class MainController {
 
-    //주문하기
-    @GetMapping("/newOrder")
-    fun showNewOrderView(): ModelAndView {
-        return ModelAndView("new_order_view")
-    }
-
     //주문관리
     @GetMapping("/manageOrders")
     fun showManageOrdersView(): ModelAndView {

@@ -4,15 +4,31 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="SHOPPING_MALL_SYSTEM.shoppingmall.mapper.ProductMapper">
+    
+    <resultMap id="productResultMap" type="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
+        <result property="product_id" column="product_id"/>
+        <result property="user_id" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="created_at" column="created_at"/>
+        <result property="modified_at" column="modified_at"/>
+        <result property="deleted_at" column="deleted_at"/>
+        <result property="status" column="status"/>
+        <result property="image_url" column="image_url"/>
+    </resultMap>
+
     <insert id="addProduct" parameterType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
         INSERT INTO Products(user_id, name, description, price, stock, image_url) 
         VALUES (#{user_id}, #{name}, #{description}, #{price}, #{stock}, #{image_url}) 
     </insert>
 
-    <select id="getProductsByUserId" resultType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
+    <select id="getProductsByUserId" resultMap="productResultMap">
         SELECT product_id, user_id, name, description, price, stock, created_at, modified_at, deleted_at, status, image_url
         FROM Products
         WHERE user_id = #{user_id}
+        ORDER BY created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -20,6 +36,20 @@
         SELECT COUNT(*) 
         FROM Products 
         WHERE user_id = #{user_id}
+    </select>
+    
+    <select id="getAllProducts" resultMap="productResultMap">
+        SELECT product_id, name, description, price, stock, image_url
+        FROM Products
+        WHERE status = 'available' and deleted_at IS NULL
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAllProducts" resultType="int">
+        SELECT COUNT(*) 
+        FROM Products 
+        WHERE status = 'available' and deleted_at IS NULL
     </select>
 
     <update id="updateProduct" parameterType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">

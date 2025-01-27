@@ -14,7 +14,7 @@ class UserService(private val userMapper: UserMapper) {
         userMapper.insertTestData("기훈", "1234")
     }
 
-    fun getUser(user_id: String): Optional<String>{
+    fun getUser(user_id: Int): Optional<String>{
         return Optional.ofNullable(userMapper.getUser(user_id))
     }
 }

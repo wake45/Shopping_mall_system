@@ -15,7 +15,7 @@ class ProductController(private val productService: ProductService){
 
     //상품등록 화면이동
     @GetMapping("/addProductView")
-    fun showaddProductView(@RequestParam user_id: String): ModelAndView {
+    fun showAddProductView(@RequestParam user_id: Int): ModelAndView {
         val modelAndView = ModelAndView("add_product_view")
         modelAndView.addObject("user_id", user_id)
 
@@ -38,7 +38,7 @@ class ProductController(private val productService: ProductService){
     //상품관리 화면이동
     @GetMapping("/manageProductsView")
     fun showManageProductsView(
-        @RequestParam user_id: String,
+        @RequestParam user_id: Int,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "5") size: Int,
         model: Model
@@ -77,9 +77,11 @@ class ProductController(private val productService: ProductService){
     }
 
     @PutMapping("/updateProduct")
-    fun updateProduct(@ModelAttribute product: Product, @RequestParam("image") file: MultipartFile): ResponseEntity<String>{
-        productService.deleteImage(product.image_url)
-        product.image_url = productService.saveImage(file)
+    fun updateProduct(@ModelAttribute product: Product, @RequestParam("image", required = false) file: MultipartFile?): ResponseEntity<String>{
+        if (file != null && !file.isEmpty) {
+            productService.deleteImage(product.image_url)
+            product.image_url = productService.saveImage(file)
+        }
 
         val isSuccess = productService.updateProduct(product)
         return if (isSuccess){

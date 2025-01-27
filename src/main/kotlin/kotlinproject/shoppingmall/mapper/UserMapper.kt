@@ -5,5 +5,5 @@ import org.apache.ibatis.annotations.Mapper
 @Mapper
 interface UserMapper{
     fun insertTestData(username: String, password: String)
-    fun getUser(user_id: String): String
+    fun getUser(user_id: Int): String
 }

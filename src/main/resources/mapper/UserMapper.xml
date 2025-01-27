@@ -9,7 +9,7 @@
         VALUES (#{username}, #{password})
     </insert>
 
-    <select id="getUser" parameterType="String">
+    <select id="getUser" parameterType="int">
         SELECT username
         FROM Users
         WHERE user_id = #{user_id}
