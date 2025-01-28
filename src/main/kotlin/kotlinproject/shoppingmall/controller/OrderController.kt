@@ -1,6 +1,11 @@
 package SHOPPING_MALL_SYSTEM.shoppingmall.controller
 
 import SHOPPING_MALL_SYSTEM.shoppingmall.service.ProductService
+import SHOPPING_MALL_SYSTEM.shoppingmall.service.OrderService
+import SHOPPING_MALL_SYSTEM.shoppingmall.model.Order
+import SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderItem
+import SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderResult
+import SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderRequest
 import SHOPPING_MALL_SYSTEM.shoppingmall.model.Product
 import SHOPPING_MALL_SYSTEM.shoppingmall.model.ProductResult
 import org.springframework.http.ResponseEntity
@@ -9,9 +14,10 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.ui.Model
+import java.math.BigDecimal
 
 @RestController
-class OrderController(private val productService: ProductService){
+class OrderController(private val productService: ProductService, private val orderService: OrderService){
 
     //주문하기 화면이동
     @GetMapping("/newOrderView")
@@ -21,7 +27,6 @@ class OrderController(private val productService: ProductService){
         @RequestParam(defaultValue = "10") size: Int,
         model: Model
     ) : ModelAndView {
-        val offset = (page - 1) * size
         val result: ProductResult = productService.getAllProducts(page, size)
 
         // 페이지네이션 정보 추가
@@ -53,5 +58,29 @@ class OrderController(private val productService: ProductService){
             }
         }
     }
+
+    //주문하기
+    @PostMapping("/newOrder")
+    fun newOrder(
+        @RequestBody orderRequest: OrderRequest
+    ): ResponseEntity<String> {
+        println(orderRequest)
+        val order = Order(
+            user_id = orderRequest.user_id,
+            total_amount = orderRequest.orderItems.sumOf { it.quantity },
+            total_price = orderRequest.orderItems.fold(BigDecimal.ZERO) { acc, item -> 
+                acc + item.price
+            },
+            status = "completed"
+        )
+
+       val isSuccess = orderService.newOrder(order, orderRequest.orderItems)
+        return if (isSuccess){
+            ResponseEntity.ok("구매 완료되었습니다.") // 성공 메시지 반환
+        } else {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 구매 실패")
+        }
+    }
+
 
 }

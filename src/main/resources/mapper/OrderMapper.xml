@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SHOPPING_MALL_SYSTEM.shoppingmall.mapper.OrderMapper">
+
+    <resultMap id="OrderResultMap" type="SHOPPING_MALL_SYSTEM.shoppingmall.model.Order">
+        <result property="order_id" column="order_id"/>
+        <result property="user_id" column="user_id"/>
+        <result property="order_date" column="order_date"/>
+        <result property="modified_date" column="modified_date"/>
+        <result property="total_amount" column="total_amount"/>
+        <result property="total_price" column="total_price"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <resultMap id="OrderItemsResultMap" type="SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderItem">
+        <result property="order_item_id" column="order_item_id"/>
+        <result property="order_id" column="order_id"/>
+        <result property="product_id" column="product_id"/>
+        <result property="qunatity" column="qunatity"/>
+        <result property="price" column="price"/>
+    </resultMap>
+
+    <insert id="newOrder" parameterType="SHOPPING_MALL_SYSTEM.shoppingmall.model.Order" useGeneratedKeys="true" keyProperty="order_id">
+        INSERT INTO Orders(user_id, total_amount, total_price, status) 
+        VALUES (#{user_id}, #{total_amount}, #{total_price}, 'completed')
+    </insert>
+
+    <insert id="newOrderItem" parameterType="SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderItem">
+        INSERT INTO OrderItems(order_id, product_id, quantity, price) 
+        VALUES (#{order_id}, #{product_id}, #{quantity}, #{price})
+    </insert>
+</mapper>

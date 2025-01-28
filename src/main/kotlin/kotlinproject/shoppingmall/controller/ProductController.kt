@@ -43,7 +43,6 @@ class ProductController(private val productService: ProductService){
         @RequestParam(defaultValue = "5") size: Int,
         model: Model
     ) : ModelAndView {
-        val offset = (page - 1) * size
         val result: ProductResult = productService.getProductsByUserId(user_id, page, size)
 
         // 페이지네이션 정보 추가
