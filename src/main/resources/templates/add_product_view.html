@@ -120,8 +120,11 @@
                         location.reload(); // 성공 시 페이지 새로 고침
                     },
                     error: function(xhr) {
-                        // 오류 메시지 팝업
-                        alert("상품 등록 중 오류가 발생했습니다.");
+                        if (xhr.status === 400) {
+                            alert("오류: " + xhr.responseText); // 서버에서 반환한 메시지 표시
+                        } else {
+                            alert("상품 등록 중 오류가 발생했습니다."); // 일반 오류 메시지
+                        }
                     }
                 });
             });

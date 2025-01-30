@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.ui.Model
+import java.math.BigDecimal
 
 @RestController
 class ProductController(private val productService: ProductService){
@@ -25,7 +26,16 @@ class ProductController(private val productService: ProductService){
     //상품등록
     @PostMapping("/addProduct")
     fun addProduct(@ModelAttribute product: Product, @RequestParam("image") file: MultipartFile): ResponseEntity<String>{
-        product.image_url = productService.saveImage(file)
+        if (product.price <= BigDecimal.ZERO) {
+            return ResponseEntity.badRequest().body("가격은 0보다 커야 합니다.")
+        }
+
+        // 이미지 저장
+        try {
+            product.image_url = productService.saveImage(file)
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 저장 실패: ${e.message}")
+        }
 
         val isSuccess = productService.addProduct(product)
         return if (isSuccess){
@@ -77,13 +87,21 @@ class ProductController(private val productService: ProductService){
 
     @PutMapping("/updateProduct")
     fun updateProduct(@ModelAttribute product: Product, @RequestParam("image", required = false) file: MultipartFile?): ResponseEntity<String>{
+        if (product.price <= BigDecimal.ZERO) {
+            return ResponseEntity.badRequest().body("가격은 0보다 커야 합니다.")
+        }
+
         if (file != null && !file.isEmpty) {
-            productService.deleteImage(product.image_url)
-            product.image_url = productService.saveImage(file)
+            try {
+                productService.deleteImage(product.image_url)
+                product.image_url = productService.saveImage(file)
+            } catch (e: Exception) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 저장 실패: ${e.message}")
+            }
         }
 
         val isSuccess = productService.updateProduct(product)
-        return if (isSuccess){
+        return if (isSuccess) {
             ResponseEntity.ok("상품이 수정되었습니다.") // 성공 메시지 반환
         } else {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 수정 실패")

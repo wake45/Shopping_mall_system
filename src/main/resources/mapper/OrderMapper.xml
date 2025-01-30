@@ -32,4 +32,18 @@
         INSERT INTO OrderItems(order_id, product_id, quantity, price) 
         VALUES (#{order_id}, #{product_id}, #{quantity}, #{price})
     </insert>
+
+    <select id="getOrdersByUserId" resultMap="OrderResultMap">
+        SELECT order_id, order_date, modified_date, total_price, status
+        FROM Orders
+        WHERE user_id = #{user_id}
+        ORDER BY order_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countOrdersByUserId" resultType="int">
+        SELECT COUNT(*) 
+        FROM Orders 
+        WHERE user_id = #{user_id}
+    </select>
 </mapper>

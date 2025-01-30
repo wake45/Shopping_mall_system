@@ -456,13 +456,19 @@
                     alert('구매가 완료되었습니다.');
                     cart = []; // 장바구니 비우기
                     closeCartPopup();
+                    location.reload(); 
                 } else {
-                    alert('구매에 실패했습니다.');
+                    cart = []; 
+                    return response.text().then(errorMessage => {
+                        alert(`구매에 실패했습니다: ${errorMessage}`);
+                        location.reload(); 
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('오류가 발생했습니다.');
+                location.reload(); 
             });
         }
 

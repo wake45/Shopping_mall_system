@@ -3,6 +3,7 @@ package SHOPPING_MALL_SYSTEM.shoppingmall.service
 import SHOPPING_MALL_SYSTEM.shoppingmall.mapper.ProductMapper
 import SHOPPING_MALL_SYSTEM.shoppingmall.model.Product
 import SHOPPING_MALL_SYSTEM.shoppingmall.model.ProductResult
+import SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderItem
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
@@ -107,4 +108,44 @@ class ProductService(private val productMapper: ProductMapper){
             false
         }
     }
+
+    fun getStockCount(orderItems: List<OrderItem>): List<Int> {
+        return try{
+            val productIdArray = orderItems.map { it.product_id }
+            val stockArray = productMapper.getStockCount(productIdArray)
+            
+            val outOfStockProductIds = mutableListOf<Int>() 
+            
+            for(i in productIdArray.indices){
+                if(stockArray[i] < orderItems[i].quantity){
+                    outOfStockProductIds.add(productIdArray[i])
+                }
+            }
+            
+            outOfStockProductIds
+        } catch (e: Exception) {
+            println("오류 발생: ${e.message}")
+            emptyList()
+        }
+    }
+
+    fun getProductNameById(product_id: Int): String {
+        return try {
+            productMapper.getProductNameById(product_id)
+        } catch (e: Exception) {
+            println("오류 발생: ${e.message}")
+            "상품 이름을 가져오는 데 실패했습니다."
+        }
+    }
+
+    fun updateProductStock(orderItems: List<OrderItem>): Boolean {
+        return try{
+            productMapper.updateProductStock(orderItems) //재고 업데이트
+            true
+        } catch (e: Exception) {
+            println("오류 발생: ${e.message}")
+            false
+        }
+    }
+
 }

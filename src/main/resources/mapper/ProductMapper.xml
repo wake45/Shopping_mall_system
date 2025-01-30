@@ -5,7 +5,7 @@
 
 <mapper namespace="SHOPPING_MALL_SYSTEM.shoppingmall.mapper.ProductMapper">
     
-    <resultMap id="productResultMap" type="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
+    <resultMap id="ProductResultMap" type="SHOPPING_MALL_SYSTEM.shoppingmall.model.Product">
         <result property="product_id" column="product_id"/>
         <result property="user_id" column="user_id"/>
         <result property="name" column="name"/>
@@ -24,7 +24,7 @@
         VALUES (#{user_id}, #{name}, #{description}, #{price}, #{stock}, #{image_url}) 
     </insert>
 
-    <select id="getProductsByUserId" resultMap="productResultMap">
+    <select id="getProductsByUserId" resultMap="ProductResultMap">
         SELECT product_id, user_id, name, description, price, stock, created_at, modified_at, deleted_at, status, image_url
         FROM Products
         WHERE user_id = #{user_id}
@@ -38,10 +38,10 @@
         WHERE user_id = #{user_id}
     </select>
     
-    <select id="getAllProducts" resultMap="productResultMap">
+    <select id="getAllProducts" resultMap="ProductResultMap">
         SELECT product_id, name, description, price, stock, image_url
         FROM Products
-        WHERE status = 'available' and deleted_at IS NULL
+        WHERE status = 'available' and deleted_at IS NULL and stock > 0
         ORDER BY created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
@@ -62,5 +62,28 @@
         UPDATE Products
         SET deleted_at = NOW(), status = 'deleted'
         WHERE user_id = #{user_id} AND product_id = #{product_id}
+    </update>
+
+    <select id="getProductNameById" parameterType="int" resultType="String">
+        SELECT name 
+        FROM Products 
+        WHERE product_id = #{product_id}
+    </select>
+
+    <select id="getStockCount" resultType="int">
+        SELECT stock
+        FROM Products
+        WHERE product_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="updateProductStock">
+        <foreach item="item" collection="list" separator=";">
+            UPDATE Products
+            SET stock = stock - #{item.quantity}
+            WHERE product_id = #{item.product_id}
+        </foreach>
     </update>
 </mapper>

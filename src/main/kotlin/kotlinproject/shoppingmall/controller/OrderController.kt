@@ -64,7 +64,19 @@ class OrderController(private val productService: ProductService, private val or
     fun newOrder(
         @RequestBody orderRequest: OrderRequest
     ): ResponseEntity<String> {
-        println(orderRequest)
+        for(item in orderRequest.orderItems){
+            if(item.quantity <= 0) {
+                val productName = productService.getProductNameById(item.product_id)
+                return ResponseEntity.badRequest().body("$productName: 수량은 0보다 커야 합니다.")
+            }
+        }
+
+        val outOfStockProductIds: List<Int> = productService.getStockCount(orderRequest.orderItems)
+        if(outOfStockProductIds.isNotEmpty()){
+            val productNames = outOfStockProductIds.joinToString(", ") { productService.getProductNameById(it) }
+            return ResponseEntity.badRequest().body("$productNames 제품의 수량이 부족합니다.")
+        }
+
         val order = Order(
             user_id = orderRequest.user_id,
             total_amount = orderRequest.orderItems.sumOf { it.quantity },
@@ -76,11 +88,51 @@ class OrderController(private val productService: ProductService, private val or
 
        val isSuccess = orderService.newOrder(order, orderRequest.orderItems)
         return if (isSuccess){
+            productService.updateProductStock(orderRequest.orderItems) //재고 수량 업데이트
+
             ResponseEntity.ok("구매 완료되었습니다.") // 성공 메시지 반환
         } else {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 구매 실패")
         }
     }
 
+    //주문관리
+    @GetMapping("/manageOrdersView")
+    fun showManageOrdersView( 
+        @RequestParam user_id: Int,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "5") size: Int,
+        model: Model
+    ): ModelAndView {
+        val result: OrderResult = orderService.getOrdersByUserId(user_id, page, size)
 
+        // 페이지네이션 정보 추가
+        val totalPages = if (result.total != null && size > 0) {
+            (result.total + size - 1) / size // 총 페이지 수 계산
+        } else {
+            0
+        }
+        val pageNumbers = mutableListOf<Int>()
+        val startPage = if (page <= 3) 1 else if (page + 2 >= totalPages) totalPages - 4 else page - 2
+         val endPage = if (startPage + 4 > totalPages) totalPages else startPage + 4
+
+        for (i in startPage..endPage) {
+            pageNumbers.add(i)
+        }
+
+        return when{
+            result.success -> {
+                model.addAttribute("user_id", user_id)
+                model.addAttribute("orders", result.orders)
+                model.addAttribute("total", result.total)
+                model.addAttribute("pageNumbers", pageNumbers)
+                model.addAttribute("currentPage", page)                
+                ModelAndView("manage_orders_view")
+            }
+            else -> {
+                model.addAttribute("errorMessage", result.errorMessage)
+                ModelAndView("error_view")
+            }
+        }
+    }
 }

@@ -6,7 +6,7 @@ import java.math.BigDecimal
 
 data class OrderResult(
     val success: Boolean,
-    val order: Order = Order(null, 0, null, null, 0, BigDecimal.ZERO, "pending"),
+    val orders: List<Order> = emptyList(),
     val orderItems: List<OrderItem> = emptyList(),
     val total: Int? = null,
     val errorMessage: String? = null

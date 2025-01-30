@@ -2,6 +2,7 @@ package SHOPPING_MALL_SYSTEM.shoppingmall.mapper
 
 import org.apache.ibatis.annotations.Mapper
 import SHOPPING_MALL_SYSTEM.shoppingmall.model.Product
+import SHOPPING_MALL_SYSTEM.shoppingmall.model.OrderItem
 
 @Mapper
 interface ProductMapper{
@@ -12,4 +13,7 @@ interface ProductMapper{
     fun countAllProducts(): Int
     fun updateProduct(product: Product)
     fun deleteProduct(product_id: Int, user_id: Int)
+    fun getStockCount(productIds: List<Int>): List<Int>  
+    fun getProductNameById(product_id: Int): String
+    fun updateProductStock(orderItems: List<OrderItem>)
 }

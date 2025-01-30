@@ -26,4 +26,17 @@ class OrderService(private val orderMapper: OrderMapper){
         }
     }
 
+    fun getOrdersByUserId(user_id: Int, page: Int, size: Int): OrderResult {
+        return try{
+            val offset = page * size
+            val orders: List<Order> = orderMapper.getOrdersByUserId(user_id, size, offset)
+            val totalOrders = orderMapper.countOrdersByUserId(user_id)
+
+            OrderResult(success = true, orders = orders, total = totalOrders)
+        }catch(e: Exception){
+            println("오류 발생: ${e.message}")
+            OrderResult(success = false, errorMessage = e.message)
+        }
+    }
+
 }
