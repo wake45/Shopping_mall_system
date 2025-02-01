@@ -33,10 +33,20 @@ class OrderService(private val orderMapper: OrderMapper){
             val totalOrders = orderMapper.countOrdersByUserId(user_id)
 
             OrderResult(success = true, orders = orders, total = totalOrders)
-        }catch(e: Exception){
+        } catch (e: Exception) {
             println("오류 발생: ${e.message}")
             OrderResult(success = false, errorMessage = e.message)
         }
     }
 
+    fun getOrderItemsByOrderId(order_id: Int): OrderResult {
+        return try{
+            val orderItems: List<OrderItem> = orderMapper.getOrderItemsByOrderId(order_id)
+
+            OrderResult(success = true, orderItems = orderItems)
+        } catch (e: Exception) {
+            println("오류 발생: ${e.message}")
+            OrderResult(success = false, errorMessage = e.message)
+        }
+    }
 }

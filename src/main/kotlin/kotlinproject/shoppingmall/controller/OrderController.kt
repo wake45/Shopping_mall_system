@@ -61,34 +61,34 @@ class OrderController(private val productService: ProductService, private val or
 
     //주문하기
     @PostMapping("/newOrder")
-    fun newOrder(
-        @RequestBody orderRequest: OrderRequest
-    ): ResponseEntity<String> {
-        for(item in orderRequest.orderItems){
+    fun newOrder(@RequestBody orderRequest: OrderRequest): ResponseEntity<String> {
+        val items = orderRequest.orderItems ?: emptyList()
+
+        for(item in items){
             if(item.quantity <= 0) {
                 val productName = productService.getProductNameById(item.product_id)
                 return ResponseEntity.badRequest().body("$productName: 수량은 0보다 커야 합니다.")
             }
         }
 
-        val outOfStockProductIds: List<Int> = productService.getStockCount(orderRequest.orderItems)
+        val outOfStockProductIds: List<Int> = productService.getStockCount(items)
         if(outOfStockProductIds.isNotEmpty()){
             val productNames = outOfStockProductIds.joinToString(", ") { productService.getProductNameById(it) }
             return ResponseEntity.badRequest().body("$productNames 제품의 수량이 부족합니다.")
         }
 
         val order = Order(
-            user_id = orderRequest.user_id,
-            total_amount = orderRequest.orderItems.sumOf { it.quantity },
-            total_price = orderRequest.orderItems.fold(BigDecimal.ZERO) { acc, item -> 
+            user_id = orderRequest.user_id ?: return ResponseEntity.badRequest().body("유저 ID가 필요합니다."),
+            total_amount = items.sumOf { it.quantity },
+            total_price = items.fold(BigDecimal.ZERO) { acc, item -> 
                 acc + item.price
             },
             status = "completed"
         )
 
-       val isSuccess = orderService.newOrder(order, orderRequest.orderItems)
+       val isSuccess = orderService.newOrder(order, items)
         return if (isSuccess){
-            productService.updateProductStock(orderRequest.orderItems) //재고 수량 업데이트
+            productService.updateProductStock(items) //재고 수량 업데이트
 
             ResponseEntity.ok("구매 완료되었습니다.") // 성공 메시지 반환
         } else {
@@ -114,7 +114,7 @@ class OrderController(private val productService: ProductService, private val or
         }
         val pageNumbers = mutableListOf<Int>()
         val startPage = if (page <= 3) 1 else if (page + 2 >= totalPages) totalPages - 4 else page - 2
-         val endPage = if (startPage + 4 > totalPages) totalPages else startPage + 4
+        val endPage = if (startPage + 4 > totalPages) totalPages else startPage + 4
 
         for (i in startPage..endPage) {
             pageNumbers.add(i)
@@ -134,5 +134,23 @@ class OrderController(private val productService: ProductService, private val or
                 ModelAndView("error_view")
             }
         }
+    }
+
+    //주문상세조회
+    @PostMapping("/getOrderItems")
+    fun getOrderItems(@RequestBody orderRequest: OrderRequest): ResponseEntity<OrderResult> {
+        val orderId = orderRequest.order_id ?: return ResponseEntity.badRequest().body(
+            OrderResult(success = false, errorMessage = "주문 ID가 필요합니다.")
+        )
+        val result: OrderResult = orderService.getOrderItemsByOrderId(orderId)
+
+        if(!result.success){
+            return ResponseEntity.badRequest().body(result)
+        }
+
+        val productArray = productService.getProductImageUrlsByProductId(result.orderItems)
+        val updatedResult = result.copy(products = productArray)
+
+        return ResponseEntity.ok(updatedResult)
     }
 }

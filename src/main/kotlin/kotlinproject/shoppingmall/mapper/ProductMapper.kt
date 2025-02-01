@@ -15,5 +15,6 @@ interface ProductMapper{
     fun deleteProduct(product_id: Int, user_id: Int)
     fun getStockCount(productIds: List<Int>): List<Int>  
     fun getProductNameById(product_id: Int): String
-    fun updateProductStock(orderItems: List<OrderItem>)
+    fun updateProductStock(product_id: Int, quantity: Int)
+    fun getProductImageUrlsByProductId(productIds: List<Int>): List<Product>
 }

@@ -145,7 +145,7 @@
 
         <input type="hidden" id="user_id" name="user_id" th:value="${user_id}"/>
         <div id="product-list">
-            <div class="product" th:each="order : ${orders}">
+            <div class="product" th:each="order : ${orders}" th:data-order-id="${order.order_id}" onclick="viewOrderDetails(this)">
                 <span class="product-name" th:text="${#dates.format(order.order_date, 'yyyy.MM.dd')} + ' 주문'"></span>
                 <span class="product-status">
                     <span th:if="${order.status == 'completed' && #dates.format(order.order_date, 'yyyy-MM-dd') >= #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">주문 완료</span>
@@ -176,14 +176,13 @@
     <div class="popup" id="confirmationPopup">
         <div class="popup-content">
             <div class="popup-header">
-                <h2>확인</h2>
+                <h2>주문 아이템 정보</h2>
                 <span class="close-btn" onclick="closeConfirmationPopup()">X</span>
             </div>
-            <p id="confirmationMessage"></p>
-            <button class="save-button" id="confirmButton">예</button>
-            <button class="save-button" onclick="closeConfirmationPopup()">아니요</button>
+            <div id="popupContent" class="popup-body"></div> <!-- 주문 아이템 정보를 표시할 영역 -->
+            <button class="save-button" onclick="closeConfirmationPopup()">닫기</button>
         </div>
-    </div>
+    </div>    
 
     <script>
         let currentAction = '';
@@ -213,10 +212,6 @@
             window.location.href = `/manageOrdersView?user_id=${userId}&page=${pageNumber-1}&size=5`;
         }
 
-        function viewOrderDetails(orderId) {
-
-        }
-
         function goBack() {
             const userId = document.getElementById('user_id').value; // hidden input에서 user_id 가져오기
 
@@ -243,6 +238,47 @@
                 console.error('There was a problem with the fetch operation:', error);
             });
         }
+
+        function viewOrderDetails(button) {
+            const order_id = button.getAttribute('data-order-id');
+
+            fetch('/getOrderItems', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ order_id: order_id })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
+            .then(orderResult => {
+                const popupContent = document.getElementById('popupContent');
+                popupContent.innerHTML = '';
+
+                orderResult.orderItems.forEach(item => {
+                    const product = orderResult.products.find(product => product.product_id === item.product_id);
+                    const imageUrl = product?.image_url;
+                    const productName = product?.name;
+
+                    const itemElement = document.createElement('div');
+                    itemElement.innerHTML = `
+                        <img src="${imageUrl || 'default-image-url.jpg'}" alt="상품 이미지" style="width: 50px; height: 50px; margin-right: 10px;">
+                        상품명: ${productName || '상품명 없음'}, 수량: ${item.quantity}, 가격: ${item.price}
+                    `;
+                    popupContent.appendChild(itemElement);
+                });
+
+                document.getElementById('confirmationPopup').style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        }
+
     </script>
 </body>
 </html>

@@ -79,11 +79,18 @@
         </foreach>
     </select>
 
-    <update id="updateProductStock">
-        <foreach item="item" collection="list" separator=";">
-            UPDATE Products
-            SET stock = stock - #{item.quantity}
-            WHERE product_id = #{item.product_id}
-        </foreach>
+    <update id="updateProductStock" parameterType="map">
+        UPDATE Products
+        SET stock = stock - #{quantity}
+        WHERE product_id = #{product_id}
     </update>
+
+    <select id="getProductImageUrlsByProductId" resultMap="ProductResultMap">
+        SELECT product_id, name, image_url
+        FROM Products
+        WHERE product_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

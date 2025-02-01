@@ -11,6 +11,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.io.File
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProductService(private val productMapper: ProductMapper){
@@ -138,9 +139,12 @@ class ProductService(private val productMapper: ProductMapper){
         }
     }
 
+    @Transactional
     fun updateProductStock(orderItems: List<OrderItem>): Boolean {
         return try{
-            productMapper.updateProductStock(orderItems) //재고 업데이트
+            for (item in orderItems) {
+                productMapper.updateProductStock(item.product_id, item.quantity)
+            }
             true
         } catch (e: Exception) {
             println("오류 발생: ${e.message}")
@@ -148,4 +152,10 @@ class ProductService(private val productMapper: ProductMapper){
         }
     }
 
+    fun getProductImageUrlsByProductId(orderItems: List<OrderItem>): List<Product> {
+        val productIdArray = orderItems.map { it.product_id }
+        val productArray = productMapper.getProductImageUrlsByProductId(productIdArray)
+
+        return productArray
+    }
 }

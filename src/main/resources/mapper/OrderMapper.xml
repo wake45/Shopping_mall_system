@@ -46,4 +46,10 @@
         FROM Orders 
         WHERE user_id = #{user_id}
     </select>
+
+    <select id="getOrderItemsByOrderId" resultMap="OrderItemsResultMap">
+        SELECT order_item_id, order_id, product_id, quantity, price
+        FROM OrderItems
+        WHERE order_id = #{order_id}
+    </select>
 </mapper>
