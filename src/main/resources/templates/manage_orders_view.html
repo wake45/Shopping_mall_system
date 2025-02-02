@@ -145,19 +145,19 @@
 
         <input type="hidden" id="user_id" name="user_id" th:value="${user_id}"/>
         <div id="product-list">
-            <div class="product" th:each="order : ${orders}" th:data-order-id="${order.order_id}" onclick="viewOrderDetails(this)">
-                <span class="product-name" th:text="${#dates.format(order.order_date, 'yyyy.MM.dd')} + ' 주문'"></span>
+            <div class="product" th:each="order : ${orders}">
+                <span class="product-name" th:text="${#dates.format(order.order_date, 'yyyy.MM.dd')} + ' 주문'" th:data-order-id="${order.order_id}" onclick="viewOrderDetails(this)"></span>
                 <span class="product-status">
-                    <span th:if="${order.status == 'completed' && #dates.format(order.order_date, 'yyyy-MM-dd') >= #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">주문 완료</span>
-                    <span th:if="${order.status == 'completed' && #dates.format(order.order_date, 'yyyy-MM-dd') < #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">배송 완료</span>
+                    <span th:if="${order.status == 'completed'}">주문 완료</span>
+                    <span th:if="${order.status == 'delivered'}">배송 완료</span>
                     <span th:if="${order.status == 'canceled'}">주문 취소</span>
                     <span th:if="${order.status == 'refunded'}">환불 완료</span>
                 </span>
-                <div class="action-buttons" th:if="${order.status == 'completed' && #dates.format(order.order_date, 'yyyy-MM-dd') >= #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
-                    <button onclick="openConfirmationPopup('주문 취소하시겠습니까?', 'cancelOrder')">주문 취소</button>
+                <div class="action-buttons" th:if="${order.status == 'completed'}">
+                    <button th:data-order-id="${order.order_id}" onclick="openConfirmationPopup('주문 취소하시겠습니까?', 'cancelOrder', this)">주문 취소</button>
                 </div>
-                <div class="action-buttons" th:if="${order.status == 'completed' && #dates.format(order.order_date, 'yyyy-MM-dd') < #dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
-                    <button onclick="openConfirmationPopup('반품 신청하시겠습니까?', 'returnRequest')">반품 신청</button>
+                <div class="action-buttons" th:if="${order.status == 'delivered'}">
+                    <button th:data-order-id="${order.order_id}" onclick="openConfirmationPopup('반품 신청하시겠습니까?', 'returnRequest', this)">반품 신청</button>
                 </div>
             </div>
         </div>
@@ -184,26 +184,52 @@
         </div>
     </div>    
 
+    <div class="popup" id="confirmationCancelPopup" style="display: none;">
+        <div class="popup-content">
+            <p id="confirmationMessage"></p>
+            <button id="confirmButton">예</button>
+            <button onclick="closeConfirmationCancelPopup()">아니오</button>
+        </div>
+    </div>
+
     <script>
         let currentAction = '';
+        let currentOrderId = '';
 
-        function openConfirmationPopup(message, action) {
+        function openConfirmationPopup(message, action, button) {
             currentAction = action;
+            currentOrderId = button.getAttribute('data-order-id');
             document.getElementById('confirmationMessage').innerText = message;
-            document.getElementById('confirmationPopup').style.display = 'flex';
+            document.getElementById('confirmationCancelPopup').style.display = 'flex';
         }
 
         function closeConfirmationPopup() {
             document.getElementById('confirmationPopup').style.display = 'none';
         }
 
-        document.getElementById('confirmButton').addEventListener('click', function() {
-            if (currentAction === 'cancelOrder') {
-                alert('주문이 취소되었습니다.');
-            } else if (currentAction === 'returnRequest') {
-                alert('반품 신청이 완료되었습니다.');
-            }
-            closeConfirmationPopup();
+        function closeConfirmationCancelPopup() {
+            document.getElementById('confirmationCancelPopup').style.display = 'none';
+        }
+
+        document.getElementById('confirmButton').addEventListener('click', function() { 
+            $.ajax({
+                url: `/updateOrderStatus?action=${encodeURIComponent(currentAction)}&order_id=${currentOrderId}`,
+                type: 'PATCH', // PATCH 메서드 사용
+                contentType: 'application/json', // JSON 형식으로 데이터 전송
+                success: function(response) {
+                    alert(currentAction === 'cancelOrder' 
+                        ? '주문이 취소되었습니다.' 
+                        : '반품 신청이 완료되었습니다.');
+                    location.reload(); // 성공 시 페이지 새로 고침
+                },
+                error: function(xhr) {
+                    console.error('Error:', xhr);
+                    alert('처리 중 오류가 발생했습니다.'); // 일반 오류 메시지
+                },
+                complete: function() {
+                    closeConfirmationCancelPopup(); // 팝업 닫기
+                }
+            });
         });
 
         function goToPage(button) {

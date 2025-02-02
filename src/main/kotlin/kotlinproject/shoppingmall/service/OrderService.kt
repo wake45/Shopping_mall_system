@@ -49,4 +49,21 @@ class OrderService(private val orderMapper: OrderMapper){
             OrderResult(success = false, errorMessage = e.message)
         }
     }
+
+    fun updateOrderStatus(action: String, order_id: Int): Boolean {
+        return try {
+        when (action) {
+                "returnRequest" -> orderMapper.updateOrderStatus("refunded", order_id)
+                "cancelOrder" -> orderMapper.updateOrderStatus("canceled", order_id)
+                else -> {
+                    println("잘못된 액션 타입: $action")
+                    false
+                }
+            }
+            true
+        } catch (e: Exception) {
+            println("오류 발생: ${e.message}")
+            false
+        }
+    }
 }

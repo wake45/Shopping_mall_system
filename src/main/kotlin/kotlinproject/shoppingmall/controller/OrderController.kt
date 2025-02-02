@@ -153,4 +153,18 @@ class OrderController(private val productService: ProductService, private val or
 
         return ResponseEntity.ok(updatedResult)
     }
+
+    //주문상태 업데이트
+    @PatchMapping("/updateOrderStatus")
+    fun updateOrderStatus(@RequestParam action: String, @RequestParam order_id: Int): ResponseEntity<String> {
+        val isSuccess = orderService.updateOrderStatus(action, order_id) //주문상태 업데이트
+
+        return if(isSuccess){
+            val productArray = orderService.getOrderItemsByOrderId(order_id) //재고수량 조회
+            productService.updateStockOnCancel(productArray.orderItems) //재고수량 업데이트
+            ResponseEntity.ok("주문 상태가 성공적으로 업데이트되었습니다.")
+        } else {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("주문 상태 업데이트에 실패했습니다.")
+        }
+    }
 }

@@ -17,4 +17,5 @@ interface ProductMapper{
     fun getProductNameById(product_id: Int): String
     fun updateProductStock(product_id: Int, quantity: Int)
     fun getProductImageUrlsByProductId(productIds: List<Int>): List<Product>
+    fun updateStockOnCancel(product_id: Int, quantity: Int)
 }

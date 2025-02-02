@@ -52,4 +52,17 @@
         FROM OrderItems
         WHERE order_id = #{order_id}
     </select>
+
+    <update id="updateOrderStatus" parameterType="map">
+        UPDATE Orders
+        SET status = #{status}
+        WHERE order_id = ${order_id}
+    </update>
+
+    <update id="updateOrdersStatus">
+        UPDATE Orders
+        SET status = 'delivered'
+        WHERE order_date &lt; NOW() - INTERVAL 1 DAY
+        AND status = 'completed'
+    </update>
 </mapper>

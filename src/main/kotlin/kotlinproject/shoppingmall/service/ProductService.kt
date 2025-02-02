@@ -158,4 +158,17 @@ class ProductService(private val productMapper: ProductMapper){
 
         return productArray
     }
+
+    @Transactional
+    fun updateStockOnCancel(orderItems: List<OrderItem>): Boolean {
+        return try{
+            for(item in orderItems){
+                productMapper.updateStockOnCancel(item.product_id, item.quantity)
+            }
+            true
+        } catch (e: Exception) {
+            println("오류 발생 ${e.message}")
+            false
+        }
+    }
 }

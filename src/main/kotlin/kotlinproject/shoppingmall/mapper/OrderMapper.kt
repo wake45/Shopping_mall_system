@@ -12,4 +12,6 @@ interface OrderMapper{
     fun getOrdersByUserId(user_id: Int, limit: Int, offset: Int): List<Order>
     fun countOrdersByUserId(user_id: Int): Int
     fun getOrderItemsByOrderId(order_id: Int): List<OrderItem>
+    fun updateOrderStatus(status: String, order_id: Int)
+    fun updateOrdersStatus()
 }

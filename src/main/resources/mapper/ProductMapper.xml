@@ -93,4 +93,10 @@
             #{id}
         </foreach>
     </select>
+
+    <update id="updateStockOnCancel" parameterType="map">
+        UPDATE Products
+        SET stock = stock + #{quantity}
+        WHERE product_id = #{product_id}
+    </update>
 </mapper>
